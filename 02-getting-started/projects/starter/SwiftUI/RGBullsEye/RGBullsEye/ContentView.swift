@@ -33,14 +33,59 @@
 import SwiftUI
 
 struct ContentView: View {
+    @State var game = Game()
+    @State var  guess: RGB
+    var target = RGB.random()
+    @State var showScore = false
   var body: some View {
-    Text("Hello, world!")
-      .padding()
+    VStack {
+        Circle()
+            .fill(Color(rgbStruct: game.target))
+        if !showScore {
+            Text("R: ??? G: ??? B: ???")
+                .padding()
+        } else {
+            Text(game.target.intString())
+                .padding()
+        }
+        Circle()
+            .fill(Color(rgbStruct: guess))
+        Text(guess.intString())
+            .padding()
+        ColorSlider(value: $guess.red, trackColor: .red)
+        ColorSlider(value: $guess.green, trackColor: .green)
+        ColorSlider(value: $guess.blue, trackColor: .blue)
+        Button(action: {
+            showScore = true
+            game.check(guess: guess)
+        }, label: {
+            Text("Hit Me!")
+        })
+        .alert(isPresented: $showScore) {
+            Alert(title: Text("Your Score"), message: Text(String(game.scoreRound)), dismissButton: .default(Text("OK")) {
+                game.startNewRound()
+                guess = RGB()
+            })
+        }
+    }
   }
 }
 
 struct ContentView_Previews: PreviewProvider {
   static var previews: some View {
-    ContentView()
+    ContentView(guess: RGB(red: 0.3, green: 0.3, blue: 0.7))
   }
+}
+
+struct ColorSlider: View {
+    @Binding var value: Double
+    var trackColor: Color
+    var body: some View {
+        HStack {
+            Text("0")
+            Slider(value: $value)
+                .accentColor(trackColor)
+            Text("255")
+        }
+    }
 }
